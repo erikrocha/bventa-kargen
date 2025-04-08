@@ -1,0 +1,52 @@
+# Directorios de salida
+/Debug
+/Release
+/Win32
+/Win64
+/data
+__history
+__recovery
+
+# Archivos de compilación
+*.dcu
+*.dcp
+*.dcr
+*.obj
+*.rsm
+
+# Archivos de configuración del IDE
+*.dsk
+*.local
+*.~*
+*.groupproj
+
+# Archivos temporales y de caché
+*.bak
+*.tmp
+*.cache
+
+# Archivos del sistema operativo
+Thumbs.db
+*.DS_Store
+
+# Archivos de configuración específicos de Windows
+*.suo
+*.user
+*.ncb
+*.sdf
+*.opensdf
+*.vcxproj.*
+*.psess
+*.vsp
+*.vsmdi
+*.suo
+*.user
+
+# Archivos generados por herramientas externas
+*.log
+*.trace
+
+# Ignorar archivo de cach  y otros
+*.identcache
+*.vlb
+*.res
