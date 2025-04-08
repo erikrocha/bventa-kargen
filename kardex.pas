@@ -131,7 +131,7 @@ begin
 
   if edt_validate_year.Text = '' then
   begin
-    showMessage('Ingresa el año Ejm: 2024');
+    ShowMessage('VALIDAR FECHAS' + sLineBreak + 'Ingresa el año que quieres validar.' + sLineBreak + 'Ejm: 2024');
     exit;
   end;
 
@@ -174,139 +174,138 @@ begin
     ShowMessage('Todas las fechas son válidas y están dentro del rango.');
 end;
 
-procedure Tfrm_kardex.Button1Click(Sender: TObject);
-var
-  i, j, qty: Integer;
-begin
-
-
-
-  // Setting query
-  dm.IBQuery1.Close;
-  dm.IBQuery1.SQL.Text :=
-    'SELECT ' +
-    '    k.id AS kardex_id, ' +
-    '    k.product_sku AS sku, ' +
-    '    p.description, ' +
-    '    MAX(k.fecha) AS fecha, ' +
-    '    k.tipo, ' +
-    '    k.serie, ' +
-    '    k.number, ' +
-    '    k.type_operation, ' +
-    '    k.output, ' +
-    '    k.input ' +
-    'FROM ' +
-    '    kardex k ' +
-    'JOIN ' +
-    '    products p ON p.sku = k.product_sku ' +
-    'GROUP BY ' +
-    '    k.id, k.product_sku, p.description, k.tipo, k.serie, k.number, k.type_operation, k.output, k.input ' +
-    'ORDER BY ' +
-    '    p.description, MAX(fecha), k.number';
-  dm.IBQuery1.Open;
-
-  // Verificar si hay registros en la consulta
-  if dm.IBQuery1.RecordCount = 0 then
-  begin
-    ShowMessage('No hay registros para cargar.');
-    Exit;
-  end;
-
-  // Setting sg_data
-  StringGrid1.ColCount := 11;
-  StringGrid1.Cells[0, 0] := 'SKU';
-  StringGrid1.Cells[1, 0] := 'Descripción';
-  StringGrid1.Cells[2, 0] := 'Fecha';
-  StringGrid1.Cells[3, 0] := 'Tipo';
-  StringGrid1.Cells[4, 0] := 'Serie';
-  StringGrid1.Cells[5, 0] := 'Número';
-  StringGrid1.Cells[6, 0] := 'T. Ope.';
-  StringGrid1.Cells[7, 0] := 'Salida';
-  StringGrid1.Cells[8, 0] := 'Entrada';
-  StringGrid1.Cells[9, 0] := '#';
-  StringGrid1.Cells[10, 0] := 'ID';
-
-  i := 1;
-
-  // 100, 1000 or all data
-  if rb_100.Checked then
-    qty := 100
-  else if rb_1000.Checked then
-    qty := 1000
-  else if rb_all.Checked then
-    qty := -1
-  else
-    qty := 0;
-
-  // Setting progress_bar
-  ProgressBar1.Min := 0;
-  ProgressBar1.Max := qty;
-  ProgressBar1.Position := 0;
-  ProgressBar1.Step := 1;
-
-  if qty = -1 then
-  begin
-    dm.IBQuery1.Last;
-    ProgressBar1.Min := 0;
-    ProgressBar1.Max := dm.IBQuery1.RecordCount;
-    ProgressBar1.Position := 0;
-    ProgressBar1.Step := 1;
-    ShowMessage('Cargando ' + IntToStr(dm.IBQuery1.RecordCount) + ' registros.');
-    dm.IBQuery1.First;
-
-    // Modificación aquí para cargar solo si hay más de un registro
-    while not dm.IBQuery1.Eof do
-    begin
-      StringGrid1.RowCount := i + 1;
-      StringGrid1.Cells[0, i] := dm.IBQuery1.FieldByName('sku').AsString;
-      StringGrid1.Cells[1, i] := dm.IBQuery1.FieldByName('description').AsString;
-      StringGrid1.Cells[2, i] := dm.IBQuery1.FieldByName('fecha').AsString;
-      StringGrid1.Cells[3, i] := dm.IBQuery1.FieldByName('tipo').AsString;
-      StringGrid1.Cells[4, i] := dm.IBQuery1.FieldByName('serie').AsString;
-      StringGrid1.Cells[5, i] := dm.IBQuery1.FieldByName('number').AsString;
-      StringGrid1.Cells[6, i] := dm.IBQuery1.FieldByName('type_operation').AsString;
-      StringGrid1.Cells[7, i] := dm.IBQuery1.FieldByName('output').AsString;
-      StringGrid1.Cells[8, i] := dm.IBQuery1.FieldByName('input').AsString;
-      StringGrid1.Cells[9, i] := IntToStr(i);
-      StringGrid1.Cells[10, i] := dm.IBQuery1.FieldByName('kardex_id').AsString;
-
-      ProgressBar1.Position := i;
-      Application.ProcessMessages;
-
-      dm.IBQuery1.Next;
-      Inc(i);
-    end;
-  end
-  else
-  begin
-    // Modificación aquí para cargar solo el número de registros deseado
-    for j := 1 to Min(qty, dm.IBQuery1.RecordCount) do
-    begin
-      StringGrid1.RowCount := i + 1;
-      StringGrid1.Cells[0, i] := dm.IBQuery1.FieldByName('sku').AsString;
-      StringGrid1.Cells[1, i] := dm.IBQuery1.FieldByName('description').AsString;
-      StringGrid1.Cells[2, i] := dm.IBQuery1.FieldByName('fecha').AsString;
-      StringGrid1.Cells[3, i] := dm.IBQuery1.FieldByName('tipo').AsString;
-      StringGrid1.Cells[4, i] := dm.IBQuery1.FieldByName('serie').AsString;
-      StringGrid1.Cells[5, i] := dm.IBQuery1.FieldByName('number').AsString;
-      StringGrid1.Cells[6, i] := dm.IBQuery1.FieldByName('type_operation').AsString;
-      StringGrid1.Cells[7, i] := dm.IBQuery1.FieldByName('output').AsString;
-      StringGrid1.Cells[8, i] := dm.IBQuery1.FieldByName('input').AsString;
-      StringGrid1.Cells[9, i] := IntToStr(i);
-      StringGrid1.Cells[10, i] := dm.IBQuery1.FieldByName('kardex_id').AsString;
-
-      ProgressBar1.Position := j;
-      Application.ProcessMessages;
-
-      dm.IBQuery1.Next;
-      Inc(i);
-    end;
-  end;
-
-  ShowMessage('¡Carga de datos completado!');
-  btn_export_excel.Enabled := true;
-end;
-
+//procedure Tfrm_kardex.Button1Click(Sender: TObject);
+//var
+//  i, j, qty: Integer;
+//begin
+//
+//
+//
+//  // Setting query
+//  dm.IBQuery1.Close;
+//  dm.IBQuery1.SQL.Text :=
+//    'SELECT ' +
+//    '    k.id AS kardex_id, ' +
+//    '    k.product_sku AS sku, ' +
+//    '    p.description, ' +
+//    '    MAX(k.fecha) AS fecha, ' +
+//    '    k.tipo, ' +
+//    '    k.serie, ' +
+//    '    k.number, ' +
+//    '    k.type_operation, ' +
+//    '    k.output, ' +
+//    '    k.input ' +
+//    'FROM ' +
+//    '    kardex k ' +
+//    'JOIN ' +
+//    '    products p ON p.sku = k.product_sku ' +
+//    'GROUP BY ' +
+//    '    k.id, k.product_sku, p.description, k.tipo, k.serie, k.number, k.type_operation, k.output, k.input ' +
+//    'ORDER BY ' +
+//    '    p.description, MAX(fecha), k.number';
+//  dm.IBQuery1.Open;
+//
+//  // Verificar si hay registros en la consulta
+//  if dm.IBQuery1.RecordCount = 0 then
+//  begin
+//    ShowMessage('No hay registros para cargar.');
+//    Exit;
+//  end;
+//
+//  // Setting sg_data
+//  StringGrid1.ColCount := 11;
+//  StringGrid1.Cells[0, 0] := 'SKU';
+//  StringGrid1.Cells[1, 0] := 'Descripción';
+//  StringGrid1.Cells[2, 0] := 'Fecha';
+//  StringGrid1.Cells[3, 0] := 'Tipo';
+//  StringGrid1.Cells[4, 0] := 'Serie';
+//  StringGrid1.Cells[5, 0] := 'Número';
+//  StringGrid1.Cells[6, 0] := 'T. Ope.';
+//  StringGrid1.Cells[7, 0] := 'Salida';
+//  StringGrid1.Cells[8, 0] := 'Entrada';
+//  StringGrid1.Cells[9, 0] := '#';
+//  StringGrid1.Cells[10, 0] := 'ID';
+//
+//  i := 1;
+//
+//  // 100, 1000 or all data
+//  if rb_100.Checked then
+//    qty := 100
+//  else if rb_1000.Checked then
+//    qty := 1000
+//  else if rb_all.Checked then
+//    qty := -1
+//  else
+//    qty := 0;
+//
+//  // Setting progress_bar
+//  ProgressBar1.Min := 0;
+//  ProgressBar1.Max := qty;
+//  ProgressBar1.Position := 0;
+//  ProgressBar1.Step := 1;
+//
+//  if qty = -1 then
+//  begin
+//    dm.IBQuery1.Last;
+//    ProgressBar1.Min := 0;
+//    ProgressBar1.Max := dm.IBQuery1.RecordCount;
+//    ProgressBar1.Position := 0;
+//    ProgressBar1.Step := 1;
+//    ShowMessage('Cargando ' + IntToStr(dm.IBQuery1.RecordCount) + ' registros.');
+//    dm.IBQuery1.First;
+//
+//    // Modificación aquí para cargar solo si hay más de un registro
+//    while not dm.IBQuery1.Eof do
+//    begin
+//      StringGrid1.RowCount := i + 1;
+//      StringGrid1.Cells[0, i] := dm.IBQuery1.FieldByName('sku').AsString;
+//      StringGrid1.Cells[1, i] := dm.IBQuery1.FieldByName('description').AsString;
+//      StringGrid1.Cells[2, i] := dm.IBQuery1.FieldByName('fecha').AsString;
+//      StringGrid1.Cells[3, i] := dm.IBQuery1.FieldByName('tipo').AsString;
+//      StringGrid1.Cells[4, i] := dm.IBQuery1.FieldByName('serie').AsString;
+//      StringGrid1.Cells[5, i] := dm.IBQuery1.FieldByName('number').AsString;
+//      StringGrid1.Cells[6, i] := dm.IBQuery1.FieldByName('type_operation').AsString;
+//      StringGrid1.Cells[7, i] := dm.IBQuery1.FieldByName('output').AsString;
+//      StringGrid1.Cells[8, i] := dm.IBQuery1.FieldByName('input').AsString;
+//      StringGrid1.Cells[9, i] := IntToStr(i);
+//      StringGrid1.Cells[10, i] := dm.IBQuery1.FieldByName('kardex_id').AsString;
+//
+//      ProgressBar1.Position := i;
+//      Application.ProcessMessages;
+//
+//      dm.IBQuery1.Next;
+//      Inc(i);
+//    end;
+//  end
+//  else
+//  begin
+//    // Modificación aquí para cargar solo el número de registros deseado
+//    for j := 1 to Min(qty, dm.IBQuery1.RecordCount) do
+//    begin
+//      StringGrid1.RowCount := i + 1;
+//      StringGrid1.Cells[0, i] := dm.IBQuery1.FieldByName('sku').AsString;
+//      StringGrid1.Cells[1, i] := dm.IBQuery1.FieldByName('description').AsString;
+//      StringGrid1.Cells[2, i] := dm.IBQuery1.FieldByName('fecha').AsString;
+//      StringGrid1.Cells[3, i] := dm.IBQuery1.FieldByName('tipo').AsString;
+//      StringGrid1.Cells[4, i] := dm.IBQuery1.FieldByName('serie').AsString;
+//      StringGrid1.Cells[5, i] := dm.IBQuery1.FieldByName('number').AsString;
+//      StringGrid1.Cells[6, i] := dm.IBQuery1.FieldByName('type_operation').AsString;
+//      StringGrid1.Cells[7, i] := dm.IBQuery1.FieldByName('output').AsString;
+//      StringGrid1.Cells[8, i] := dm.IBQuery1.FieldByName('input').AsString;
+//      StringGrid1.Cells[9, i] := IntToStr(i);
+//      StringGrid1.Cells[10, i] := dm.IBQuery1.FieldByName('kardex_id').AsString;
+//
+//      ProgressBar1.Position := j;
+//      Application.ProcessMessages;
+//
+//      dm.IBQuery1.Next;
+//      Inc(i);
+//    end;
+//  end;
+//
+//  ShowMessage('¡Carga de datos completado!');
+//  btn_export_excel.Enabled := true;
+//end;
 
 procedure Tfrm_kardex.btn_export_excelClick(Sender: TObject);
 var
@@ -448,6 +447,137 @@ begin
       ShowMessage('Ocurrió un error: ' + E.Message);
   end;
 end;
+
+procedure Tfrm_kardex.Button1Click(Sender: TObject);
+var
+  i, j, qty: Integer;
+begin
+  dm.IBQuery1.Close;
+  dm.IBQuery1.SQL.Text :=
+    'SELECT ' +
+    '    k.id AS kardex_id, ' +
+    '    k.product_sku AS sku, ' +
+    '    p.description, ' +
+    '    MAX(k.fecha) AS fecha, ' +
+    '    k.tipo, ' +
+    '    k.serie, ' +
+    '    k.number, ' +
+    '    k.type_operation, ' +
+    '    k.output, ' +
+    '    k.input ' +
+    'FROM ' +
+    '    kardex k ' +
+    'JOIN ' +
+    '    products p ON p.sku = k.product_sku ' +
+    'GROUP BY ' +
+    '    k.id, k.product_sku, p.description, k.tipo, k.serie, k.number, k.type_operation, k.output, k.input ' +
+    'ORDER BY ' +
+    '    p.description, MAX(fecha), k.number';
+  dm.IBQuery1.Open;
+
+  if dm.IBQuery1.IsEmpty then
+  begin
+    ShowMessage('No existen registros en la tabla kardex.');
+    Exit;
+  end;
+
+  // Setting StringGrid
+  StringGrid1.ColCount := 11;
+  StringGrid1.Cells[0, 0] := 'SKU';
+  StringGrid1.Cells[1, 0] := 'Descripción';
+  StringGrid1.Cells[2, 0] := 'Fecha';
+  StringGrid1.Cells[3, 0] := 'Tipo';
+  StringGrid1.Cells[4, 0] := 'Serie';
+  StringGrid1.Cells[5, 0] := 'Número';
+  StringGrid1.Cells[6, 0] := 'T. Ope.';
+  StringGrid1.Cells[7, 0] := 'Salida';
+  StringGrid1.Cells[8, 0] := 'Entrada';
+  StringGrid1.Cells[9, 0] := '#';
+  StringGrid1.Cells[10, 0] := 'ID';
+
+  i := 1;
+
+  if rb_100.Checked then
+    qty := 100
+  else if rb_1000.Checked then
+    qty := 1000
+  else if rb_all.Checked then
+    qty := -1
+  else
+    qty := 0;
+
+  // Setting progressbar
+  if qty = -1 then
+  begin
+    dm.IBQuery1.Last;
+    ProgressBar1.Min := 0;
+    ProgressBar1.Max := dm.IBQuery1.RecordCount;
+    ProgressBar1.Position := 0;
+    ProgressBar1.Step := 1;
+    ShowMessage('Cargar ' + IntToStr(dm.IBQuery1.RecordCount) + ' registros');
+    dm.IBQuery1.First;
+    while not dm.IBQuery1.Eof do
+    begin
+      // Show data in stringGrid
+      StringGrid1.RowCount := i + 1;
+      StringGrid1.Cells[0, i] := dm.IBQuery1.FieldByName('sku').AsString;
+      StringGrid1.Cells[1, i] := dm.IBQuery1.FieldByName('description').AsString;
+      StringGrid1.Cells[2, i] := dm.IBQuery1.FieldByName('fecha').AsString;
+      StringGrid1.Cells[3, i] := dm.IBQuery1.FieldByName('tipo').AsString;
+      StringGrid1.Cells[4, i] := dm.IBQuery1.FieldByName('serie').AsString;
+      StringGrid1.Cells[5, i] := dm.IBQuery1.FieldByName('number').AsString;
+      StringGrid1.Cells[6, i] := dm.IBQuery1.FieldByName('type_operation').AsString;
+      StringGrid1.Cells[7, i] := dm.IBQuery1.FieldByName('output').AsString;
+      StringGrid1.Cells[8, i] := dm.IBQuery1.FieldByName('input').AsString;
+      StringGrid1.Cells[9, i] := IntToStr(i);
+      StringGrid1.Cells[10, i] := dm.IBQuery1.FieldByName('kardex_id').AsString;
+
+      ProgressBar1.Position := i;
+      Application.ProcessMessages;
+
+      dm.IBQuery1.Next;
+      Inc(i);
+    end;
+  end
+  else
+  begin
+
+    ProgressBar1.Min := 0;
+    ProgressBar1.Max := qty;
+    ProgressBar1.Position := 0;
+    ProgressBar1.Step := 1;
+
+    for j := 1 to qty do
+    begin
+      // Check if is the last record
+      if dm.IBQuery1.Eof then
+        Break;
+
+      StringGrid1.RowCount := i + 1;
+      StringGrid1.Cells[0, i] := dm.IBQuery1.FieldByName('sku').AsString;
+      StringGrid1.Cells[1, i] := dm.IBQuery1.FieldByName('description').AsString;
+      StringGrid1.Cells[2, i] := dm.IBQuery1.FieldByName('fecha').AsString;
+      StringGrid1.Cells[3, i] := dm.IBQuery1.FieldByName('tipo').AsString;
+      StringGrid1.Cells[4, i] := dm.IBQuery1.FieldByName('serie').AsString;
+      StringGrid1.Cells[5, i] := dm.IBQuery1.FieldByName('number').AsString;
+      StringGrid1.Cells[6, i] := dm.IBQuery1.FieldByName('type_operation').AsString;
+      StringGrid1.Cells[7, i] := dm.IBQuery1.FieldByName('output').AsString;
+      StringGrid1.Cells[8, i] := dm.IBQuery1.FieldByName('input').AsString;
+      StringGrid1.Cells[9, i] := IntToStr(i);
+      StringGrid1.Cells[10, i] := dm.IBQuery1.FieldByName('kardex_id').AsString;
+
+      ProgressBar1.Position := j;
+      Application.ProcessMessages;
+
+      dm.IBQuery1.Next;
+      Inc(i);
+    end;
+  end;
+
+  ShowMessage('¡Carga de datos completado!');
+  btn_export_excel.Enabled := True;
+end;
+
 
 procedure Tfrm_kardex.FormClose(Sender: TObject; var Action: TCloseAction);
 begin

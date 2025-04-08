@@ -2,8 +2,8 @@ object frm_main: Tfrm_main
   Left = 0
   Top = 0
   Caption = 'KARGEN v0.1.1'
-  ClientHeight = 614
-  ClientWidth = 1186
+  ClientHeight = 611
+  ClientWidth = 1184
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,20 +18,18 @@ object frm_main: Tfrm_main
   object pnl_header: TPanel
     Left = 0
     Top = 0
-    Width = 1186
+    Width = 1184
     Height = 113
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 1184
     object pc_menu: TPageControl
       Left = 1
       Top = 1
-      Width = 1184
+      Width = 1182
       Height = 111
       ActivePage = tab_all
       Align = alClient
       TabOrder = 0
-      ExplicitWidth = 1182
       object tab_all: TTabSheet
         Caption = 'Menu'
         object pnl_transactions: TPanel
